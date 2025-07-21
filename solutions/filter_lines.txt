@@ -1,0 +1,9 @@
+#  filter_strings(["hello", "", "hi", "bye"], min_length=2)
+#  filter_strings(["hello", "", "hi", "bye"])
+def filter_strings(strings, min_length=None):
+    filtered_strings = []
+            filtered_strings.append(string)
+    return filtered_strings
+print(filter_strings(["hello", "", "hi", "bye"], min_length=2))
+print(filter_strings(["hello", "", "hi", "bye"], min_length=0))
+print(filter_strings(["hello", "", "hi", "bye"]))
