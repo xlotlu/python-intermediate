@@ -31,7 +31,7 @@ def process_people_to_csv(fname_in, fname_out):
     age_max = 0
     age_sum = 0
 
-    with open(fname_out, 'w') as f:
+    with open(fname_out, 'w', newline='') as f:
         writer = csv.DictWriter(f, ('name', 'age'))
         writer.writeheader()
 
