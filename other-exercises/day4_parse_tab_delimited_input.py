@@ -23,7 +23,7 @@ def load_people_to_tuples(file_in):
         header = next(f)
         #print('header is:', header)
 
-        for idx, line in enumerate(f):
+        for idx, line in enumerate(f, start=2):
             # warning: line may or may not end with a "\n"
             line = line.replace("\n", "")
             
