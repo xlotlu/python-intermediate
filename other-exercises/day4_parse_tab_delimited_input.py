@@ -33,7 +33,8 @@ def load_people_to_tuples(file_in):
             try:
                 name, age, is_customer = line.split("\t")
             except ValueError:
-                print('malformed input data on line %s: "%s"' % (idx, line))
+                #print('malformed input data on line %s: "%s"' % (idx, line))
+                print(f'malformed input data on line {idx}: "{line}"')
                 continue
             age = int(age)
 

@@ -19,11 +19,13 @@
 
 import sys
 import csv
+import json
 from os import path
 
 
 CSV_FILENAME_FORMAT = "{fname}_{colname}_{item}{ext}"
 NULL_COLUMN_PLACEHOLDER = '__NULL__'
+REPORT_FILENAME = 'report.json'
 
 
 def split_csv_by_column(fname_in, column_name,
@@ -38,62 +40,17 @@ def split_csv_by_column(fname_in, column_name,
     else:
         report_columns = report_columns.split(',')
 
-        report_column = report_columns[0]
+    report = {
+        col: {}
+        for col in report_columns
+    }
 
-    print(report_columns)
-    sys.exit()
-
-    # Q: câte fișiere vom deschide în with inițial?
-    # A: unul singur.
     with open(fname_in) as f:
         bookreader = csv.DictReader(f)
 
-        # Q: ne interesează fieldnames?
-        # A: da. dar fără column_name.
-
         # we need to filter out column_name.
-        # method 1. brute force. tried and true.
-        fields = []
-        for f in bookreader.fieldnames:
-            if f == column_name:
-                continue
-            fields.append(f)
-        #print("M1", fields)
-
-        # method 2. filter() with a function.
-        # `filter()` returns a virtual object, containing
-        # only the elements where the function returned True.
-        def filter_for_not_Publisher(name):
-            if name == column_name:
-                return False
-            return True
-
-        fields = tuple(
-            filter(filter_for_not_Publisher, bookreader.fieldnames)
-        )
-        #print("M2", fields)
-
-        # method 2. also filter() with a function,
-        # but the function is inline (a lambda).
-        fields = tuple(
-            filter(
-                lambda name: name != column_name,
-                bookreader.fieldnames
-            )
-        )
-
-        # method 3. when we know a list's methods.
         fields = bookreader.fieldnames.copy()
         fields.remove(column_name)
-        #print('M3', fields)
-        #print('!!', reader.fieldnames)
-
-
-        # Q: avem de creat (și folosit) o listă necunoscută de fișiere și writere.
-        #    cum facem asta?
-        # A: folosim un dicționar, unde cheia este nume publisherului, și valoarea
-        #    este un DictWriter
-
 
         # we initialise a dictionary of csv writers,
         # to deal with each output file
@@ -113,6 +70,13 @@ def split_csv_by_column(fname_in, column_name,
 
         try:
             for book in bookreader:
+                # we prepare the report before anything,
+                # because the column we're working on will disappear later
+                for col in report_columns:
+                    subreport = report[col]
+                    r_key = book[col]
+                    subreport[r_key] = subreport.get(r_key, 0) + 1
+
                 #publisher = book[column_name]
                 # we need to pop the publisher, because we won't write it
                 # to the csv 
@@ -149,6 +113,10 @@ def split_csv_by_column(fname_in, column_name,
                     writers[value] = writer
 
                 writer.writerow(book)
+
+            if report_columns:
+                with open(path.join(output_dir, REPORT_FILENAME), 'w') as repf:
+                    json.dump(report, repf, indent=2)
 
         except Exception as e: # <--- capturăm orice fel de excepție
             # we got some error. we should probably do something about it,
